@@ -1,0 +1,72 @@
+Project Deployment Plan: HMS on AWS
+
+Our goal is to deploy our Django application to a live, production-ready environment using services that are eligible for the AWS Free Tier.
+Phase 1: Preparing the Application for Production
+
+Before we touch AWS, we must prepare our Django project to run outside of our local development environment.
+
+    Configure Production Settings:
+
+        Switch to using the hms_config/settings/production.py file.
+
+        Set DEBUG = False.
+
+        Configure ALLOWED_HOSTS to accept traffic from our future server's IP address and domain name.
+
+        Ensure the SECRET_KEY is loaded securely from an environment variable and is not hardcoded.
+
+    Configure Static File Handling:
+
+        The Django development server automatically serves static files (CSS, JS for the admin panel). In production, this is not the case.
+
+        We will configure a library called whitenoise to allow our application to serve its own static files efficiently. These files will be collected into a single directory.
+
+Phase 2: Provisioning AWS Infrastructure
+
+Next, we will create the cloud infrastructure needed to host our application.
+
+    Create an RDS PostgreSQL Database:
+
+        We will launch a free-tier eligible db.t3.micro PostgreSQL instance using Amazon RDS (Relational Database Service).
+
+        This separates our database from our application server, a critical best practice for security and scalability.
+
+        We will configure its security group to only allow connections from our future application server.
+
+    Create an EC2 Instance (Our Virtual Server):
+
+        We will launch a free-tier eligible t2.micro EC2 instance running a standard Linux distribution (like Ubuntu). This will be our application server.
+
+        We will configure its security group to allow incoming traffic on HTTP (port 80) and HTTPS (port 443).
+
+Phase 3: Deploying and Configuring the Server
+
+This is where we turn our empty EC2 server into a functioning application host.
+
+    Deploy Code:
+
+        We will securely connect to the EC2 instance (via SSH).
+
+        We will install necessary system packages (like Python, NGINX).
+
+        We will use git to clone our project repository onto the server.
+
+    Set Up the Production Stack:
+
+        Gunicorn: We will install and configure Gunicorn. This is a production-grade WSGI server that will run our Django application (it replaces the simple manage.py runserver).
+
+        NGINX: We will install and configure NGINX as a reverse proxy. It will sit in front of Gunicorn, handle incoming web traffic, serve static files, and manage SSL/TLS for HTTPS.
+
+        Systemd: We will create service files for Gunicorn and Celery to ensure they run automatically when the server starts and restart if they ever fail.
+
+    Final Steps & Go-Live:
+
+        We will update the server's environment variables to point to our new RDS database URL.
+
+        We will run python manage.py migrate one last time on the production database.
+
+        We will run python manage.py collectstatic to gather all static files.
+
+        We will start our services and test the server's public IP address in a browser.
+
+This is a comprehensive and professional deployment plan. Our first task will be Phase 1: Preparing the Application for Production. Let me know when you are ready to begin configuring the production settings.

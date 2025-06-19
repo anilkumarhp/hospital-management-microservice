@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMS API - End-to-End Testing Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .scenario-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .step-content {
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .scenario-card.open .step-content {
+            max-height: 2000px; /* Adjust as needed */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .scenario-card.open .arrow {
+            transform: rotate(180deg);
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 antialiased">
+
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-10 md:mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">HMS API Testing Plan</h1>
+            <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">A step-by-step guide for end-to-end testing of all major application workflows using the Swagger UI.</p>
+        </header>
+
+        <main class="space-y-6 max-w-4xl mx-auto">
+
+            <!-- Scenario 1 -->
+            <div class="scenario-card bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-700">
+                <div class="p-6 cursor-pointer flex justify-between items-center" onclick="toggleScenario(this)">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-white">Scenario 1: The Admin Onboards a New Clinic</h2>
+                        <p class="text-gray-400 mt-1">Goal: Set up a new organization, branch, and invite a doctor. (Actor: Superuser)</p>
+                    </div>
+                    <svg class="arrow w-6 h-6 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="step-content px-6 bg-gray-800/50">
+                    <div class="space-y-4 border-l-2 border-cyan-500 pl-6">
+                        <div>
+                            <h3 class="font-semibold text-lg text-white">1. Authorize</h3>
+                            <p class="text-gray-400">Generate a JWT for your `admin` user via the Django shell. In Swagger UI, click "Authorize" and paste the token as `Bearer <your_token>`.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg text-white">2. Create an Organization</h3>
+                            <p class="text-gray-400">Go to `POST /api/v1/operations/organizations/`, click "Try it out", and execute with this body. **Save the `id`** from the response.</p>
+                            <pre class="bg-gray-900 rounded-md p-4 mt-2 text-sm text-gray-300"><code>{
+  "name": "Sunshine Wellness Clinic",
+  "type": "CLINIC"
+}</code></pre>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg text-white">3. Create a Branch</h3>
+                            <p class="text-gray-400">Go to `POST /api/v1/operations/branches/`. **Save the `id`** from the response.</p>
+                             <pre class="bg-gray-900 rounded-md p-4 mt-2 text-sm text-gray-300"><code>{
+  "name": "Downtown Branch",
+  "address_line_1": "123 Health St",
+  "city": "Metroville"
+}</code></pre>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg text-white">4. Invite a Doctor</h3>
+                            <p class="text-gray-400">Go to `POST /api/v1/operations/invites/`. Your Celery worker will log the event.</p>
+                             <pre class="bg-gray-900 rounded-md p-4 mt-2 text-sm text-gray-300"><code>{
+  "email": "drcarter@example.com",
+  "role": "DOCTOR"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenario 2 -->
+            <div class="scenario-card bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-700">
+                <div class="p-6 cursor-pointer flex justify-between items-center" onclick="toggleScenario(this)">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-white">Scenario 2: The Doctor's Clinical Workflow</h2>
+                        <p class="text-gray-400 mt-1">Goal: A doctor manages a patient from appointment to prescription. (Actor: Doctor)</p>
+                    </div>
+                    <svg class="arrow w-6 h-6 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="step-content px-6 bg-gray-800/50">
+                    <div class="space-y-4 border-l-2 border-indigo-500 pl-6">
+                         <div>
+                            <h3 class="font-semibold text-lg text-white">Prerequisite: "Accept" Invite</h3>
+                            <p class="text-gray-400">In the Django Admin, create a `User` named `drcarter`. Edit this user, add a `Profile`, link it to "Sunshine Wellness Clinic", and set the role to `DOCTOR`.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg text-white">1. Authorize as Doctor</h3>
+                            <p class="text-gray-400">Generate a JWT for `drcarter` and update the Authorization token in Swagger UI.</p>
+                        </div>
+                         <div>
+                            <h3 class="font-semibold text-lg text-white">2. Create a Patient</h3>
+                            <p class="text-gray-400">Go to `POST /api/v1/clinical/patients/`. **Save the `id`** for `patient_id`.</p>
+                            <pre class="bg-gray-900 rounded-md p-4 mt-2 text-sm text-gray-300"><code>{
+  "first_name": "John",
+  "last_name": "Smith",
+  "date_of_birth": "1985-05-10"
+}</code></pre>
+                        </div>
+                         <div>
+                            <h3 class="font-semibold text-lg text-white">3. Create an Appointment</h3>
+                            <p class="text-gray-400">Go to `POST /api/v1/clinical/appointments/`. Use the IDs you saved earlier. **Save the new `id`** for `appointment_id`.</p>
+                            <pre class="bg-gray-900 rounded-md p-4 mt-2 text-sm text-gray-300"><code>{
+  "patient_id": "paste_the_patient_id_here",
+  "doctor_id": "paste_the_drcarter_user_id_here",
+  "branch_id": "paste_the_branch_id_here",
+  "start_time": "2025-06-20T14:00:00Z",
+  "end_time": "2025-06-20T14:30:00Z"
+}</code></pre>
+                        </div>
+                         <div>
+                            <h3 class="font-semibold text-lg text-white">4. Complete the Appointment</h3>
+                            <p class="text-gray-400">Go to `POST /api/v1/clinical/appointments/{id}/complete/`. Enter the `appointment_id` in the `id` parameter field and execute.</p>
+                        </div>
+                         <div>
+                            <h3 class="font-semibold text-lg text-white">5. Create a Medical Record</h3>
+                            <p class="text-gray-400">Go to `POST /api/v1/clinical/appointments/{appointment_id}/medical-record/`. Enter the `appointment_id` in the parameter field.</p>
+                            <pre class="bg-gray-900 rounded-md p-4 mt-2 text-sm text-gray-300"><code>{
+  "diagnosis": "Seasonal allergies",
+  "notes": "Patient advised to take over-the-counter antihistamines."
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenario 3 -->
+            <div class="scenario-card bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-700">
+                <div class="p-6 cursor-pointer flex justify-between items-center" onclick="toggleScenario(this)">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-white">Scenario 3: The Patient Experience</h2>
+                        <p class="text-gray-400 mt-1">Goal: The patient logs in to view their own data securely. (Actor: Patient)</p>
+                    </div>
+                    <svg class="arrow w-6 h-6 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="step-content px-6 bg-gray-800/50">
+                    <div class="space-y-4 border-l-2 border-emerald-500 pl-6">
+                        <div>
+                            <h3 class="font-semibold text-lg text-white">Prerequisite: Link Patient Account</h3>
+                            <p class="text-gray-400">In the Django Admin, create a `User` named `johnsmith`. Then edit the `Patient` record for John Smith, find the `External user id` field, and paste in the **ID** of the `johnsmith` user.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg text-white">1. Authorize as Patient</h3>
+                            <p class="text-gray-400">Generate a JWT for `johnsmith` and update the Authorization token in Swagger UI.</p>
+                        </div>
+                         <div>
+                            <h3 class="font-semibold text-lg text-white">2. View "My Appointments"</h3>
+                            <p class="text-gray-400">Go to `GET /api/v1/portal/my-appointments/` and execute. The response should show the appointment created by Dr. Carter, including the nested medical record data.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function toggleScenario(element) {
+            element.parentElement.classList.toggle('open');
+        }
+    </script>
+
+</body>
+</html>

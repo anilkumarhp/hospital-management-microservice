@@ -1,0 +1,16 @@
+django
+djangorestframework
+python-dotenv
+celery
+redis
+pytest-django
+django-debug-toolbar
+django-filter
+PyJWT
+dj-database-url
+drf-nested-routers
+drf-nested-routers
+django-storages
+boto3
+drf-spectacular
+django-celery-beat
